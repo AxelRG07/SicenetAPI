@@ -23,7 +23,7 @@ class MainViewModel : ViewModel() {
     var isLoading by mutableStateOf(false)
         private set
 
-    fun autenticar(mat: String, pass: String) {
+    fun autenticar(mat: String, pass: String, onSuccesss: () -> Unit) {
         viewModelScope.launch {
             isLoading = true
             errorMessage = ""
@@ -35,6 +35,7 @@ class MainViewModel : ViewModel() {
                     val perfilResult = repository.getProfile()
                     perfilResult.onSuccess { alumno ->
                         alumnoData = alumno
+                        onSuccesss()
                     }.onFailure {
                         errorMessage = "Error al bajar perfil: ${it.message}"
                     }

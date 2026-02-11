@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
@@ -30,29 +31,17 @@ import kotlin.math.log
 
 @Composable
 fun AcademicDataScreen(
-    matricula: String,
-    password: String,
     viewModel: MainViewModel = viewModel()
 ) {
-    // LaunchedEffect: Se ejecuta una sola vez cuando se abre la pantalla
-    LaunchedEffect(Unit) {
-        // Ejecutamos el login/fetch automáticamente sin que el usuario presione nada
-        viewModel.autenticar(matricula, password)
-    }
+    val alumno = viewModel.alumnoData
 
     // UI
     Column(modifier = Modifier.fillMaxSize().padding(16.dp)) {
-        if (viewModel.isLoading) {
-            CircularProgressIndicator()
+        if (alumno != null) {
+            StudentCard(alumno)
         } else {
-            viewModel.alumnoData?.let { alumno ->
-                StudentCard(alumno) // Tu tarjeta bonita
-            }
-
-            if (viewModel.errorMessage.isNotEmpty()) {
-
-                Text("Error: ${viewModel.errorMessage}", color = Color.Red)
-            }
+            Text("No hay datos cargados")
+            Button(onClick = { /* Navegar atrás */ }) { Text("Volver") }
         }
     }
 }

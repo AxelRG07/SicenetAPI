@@ -22,8 +22,8 @@ import com.example.sicenetapi.ui.MainViewModel
 
 @Composable
 fun SicenetScreen(
-    navController: NavController,
-    viewModel: MainViewModel = viewModel()
+    viewModel: MainViewModel = viewModel(),
+    onLoginSuccess: () -> Unit
 ) {
     var matricula by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
@@ -58,13 +58,19 @@ fun SicenetScreen(
 
         Button(
             //onClick = { viewModel.autenticar(matricula, password) },
-            onClick = { navController.navigate("${AcademicDataDestination.route}/$matricula/${Base64.encodeToString(
-                password.toByteArray(),
-                Base64.NO_WRAP or Base64.URL_SAFE
-            )}") },
+            onClick = {
+                viewModel.autenticar(matricula, password) {
+                    onLoginSuccess()
+                }
+            },
+            enabled = !viewModel.isLoading,
             modifier = Modifier.fillMaxWidth()
         ) {
-            Text(if (viewModel.isLoading) "Cargando..." else "Ingresar y Consultar")
+            Text(if (viewModel.isLoading) "Cargando..." else "Ingresar")
+        }
+
+        if (viewModel.errorMessage.isNotEmpty()) {
+            Text("Error: ${viewModel.errorMessage}", color = Color.Red)
         }
     }
 }

@@ -5,11 +5,13 @@ import android.util.Base64
 import android.util.Log
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
+import com.example.sicenetapi.ui.MainViewModel
 import com.example.sicenetapi.ui.screens.AcademicDataScreen
 import com.example.sicenetapi.ui.screens.SicenetScreen
 
@@ -18,7 +20,7 @@ fun SiceNavGraph(
     modifier: Modifier = Modifier
 ) {
     val navController = rememberNavController()
-
+    val sharedViewModel: MainViewModel = viewModel()
     val startDestination = HomeDestination.route
 
     NavHost(
@@ -27,30 +29,19 @@ fun SiceNavGraph(
         modifier = modifier
     ) {
         composable(route = HomeDestination.route) {
-            SicenetScreen(navController = navController)
+            SicenetScreen(
+                viewModel = sharedViewModel,
+                onLoginSuccess = {
+                    navController.navigate(AcademicDataDestination.route)
+                }
+            )
         }
 
         composable (
-            route = "${AcademicDataDestination.route}/{matricula}/{password}",
-            arguments = listOf(
-                navArgument("matricula") { type = NavType.StringType },
-                navArgument("password") { type = NavType.StringType }
-            )
-        ){ backStackEntry ->
-            val matricula = backStackEntry.arguments?.getString("matricula") ?: ""
-            val passwordEncoded = backStackEntry.arguments?.getString("password") ?: ""
+            route = AcademicDataDestination.route
+        ){
 
-            val password = try {
-                Log.e("contra", "decodificando pass la contraseña")
-                String(
-                    Base64.decode(passwordEncoded, Base64.NO_WRAP or Base64.URL_SAFE)
-                )
-            } catch ( e: Exception ) {
-                ""
-                //Log.e("MainActivity", "Error al decodificar la contraseña", e)
-            }
-
-            AcademicDataScreen(matricula, password)
+            AcademicDataScreen(viewModel = sharedViewModel)
 
         }
 
