@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.ui.Modifier
+import com.example.sicenetapi.navigation.SiceNavGraph
 import com.example.sicenetapi.ui.screens.SicenetScreen
 import com.example.sicenetapi.ui.theme.SicenetAPITheme
 
@@ -18,7 +19,7 @@ class MainActivity : ComponentActivity() {
         setContent {
             SicenetAPITheme {
                 Surface(modifier = Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background) {
-                    SicenetScreen()
+                    SiceNavGraph()
                 }
             }
         }

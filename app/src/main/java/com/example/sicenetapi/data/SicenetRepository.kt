@@ -69,7 +69,7 @@ class SicenetRepository {
         // Paso B: Convertir ese texto a un objeto JSON real
         val json = JSONObject(jsonString)
 
-        // Paso C: Extraer los datos usando las llaves EXACTAS de tu imagen
+        // Paso C: Extraer los datos usando las llaves EXACTAS
         return Alumno(
             nombre = json.optString("nombre"),
             matricula = json.optString("matricula"),
