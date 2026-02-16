@@ -20,7 +20,7 @@ fun SiceNavGraph(
     modifier: Modifier = Modifier
 ) {
     val navController = rememberNavController()
-    val sharedViewModel: MainViewModel = viewModel()
+    val sharedViewModel: MainViewModel = viewModel(factory = MainViewModel.Factory)
     val startDestination = HomeDestination.route
 
     NavHost(
@@ -40,9 +40,7 @@ fun SiceNavGraph(
         composable (
             route = AcademicDataDestination.route
         ){
-
             AcademicDataScreen(viewModel = sharedViewModel)
-
         }
 
     }
