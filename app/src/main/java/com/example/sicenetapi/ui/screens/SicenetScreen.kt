@@ -16,7 +16,7 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
-import com.example.sicenetapi.data.Alumno
+import com.example.sicenetapi.data.local.Alumno
 import com.example.sicenetapi.navigation.AcademicDataDestination
 import com.example.sicenetapi.ui.MainViewModel
 

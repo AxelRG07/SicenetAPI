@@ -18,4 +18,20 @@ interface SicenetApi {
     )
     @POST("/ws/wsalumnos.asmx")
     suspend fun getProfile(@Body requestBody: String): retrofit2.Response<String>
+
+    @Headers("Content-Type: text/xml; charset=utf-8", "SOAPAction: \"http://tempuri.org/getCargaAcademicaByAlumno\"")
+    @POST("/ws/wsalumnos.asmx")
+    suspend fun getCargaAcademica(@Body requestBody: String): retrofit2.Response<String>
+
+    @Headers("Content-Type: text/xml; charset=utf-8", "SOAPAction: \"http://tempuri.org/getAllKardexConPromedioByAlumno\"")
+    @POST("/ws/wsalumnos.asmx")
+    suspend fun getKardex(@Body requestBody: String): retrofit2.Response<String>
+
+    @Headers("Content-Type: text/xml; charset=utf-8", "SOAPAction: \"http://tempuri.org/getAllCalifFinalByAlumnos\"")
+    @POST("/ws/wsalumnos.asmx")
+    suspend fun getCalifFinal(@Body requestBody: String): retrofit2.Response<String>
+
+    @Headers("Content-Type: text/xml; charset=utf-8", "SOAPAction: \"http://tempuri.org/getCalifUnidadesByAlumno\"")
+    @POST("/ws/wsalumnos.asmx")
+    suspend fun getCalifUnidades(@Body requestBody: String): retrofit2.Response<String>
 }

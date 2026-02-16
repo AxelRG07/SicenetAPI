@@ -10,7 +10,7 @@ import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import com.example.sicenetapi.SicenetApplication
-import com.example.sicenetapi.data.Alumno
+import com.example.sicenetapi.data.local.Alumno
 import com.example.sicenetapi.data.SicenetRepository
 import kotlinx.coroutines.launch
 

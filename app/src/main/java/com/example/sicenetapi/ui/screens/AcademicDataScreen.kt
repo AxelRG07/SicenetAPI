@@ -25,7 +25,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.example.sicenetapi.data.Alumno
+import com.example.sicenetapi.data.local.Alumno
 import com.example.sicenetapi.ui.MainViewModel
 import kotlin.math.log
 

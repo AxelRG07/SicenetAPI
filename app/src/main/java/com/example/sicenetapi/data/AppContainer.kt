@@ -1,7 +1,10 @@
 package com.example.sicenetapi.data
 
+import android.content.Context
 import com.example.sicenetapi.data.NetworkSicenetRepository
 import com.example.sicenetapi.data.SicenetRepository
+import com.example.sicenetapi.data.local.AlumnoDao
+import com.example.sicenetapi.data.local.SicenetDatabase
 import com.example.sicenetapi.network.SessionCookieJar
 import com.example.sicenetapi.network.SicenetApi
 import okhttp3.OkHttpClient
@@ -11,9 +14,10 @@ import retrofit2.converter.scalars.ScalarsConverterFactory
 
 interface AppContainer {
     val sicenetRepository: SicenetRepository
+    val alumnoDao: AlumnoDao
 }
 
-class DefaultAppContainer : AppContainer {
+class DefaultAppContainer(private val context: Context) : AppContainer {
 
     private val BASE_URL = "https://sicenet.surguanajuato.tecnm.mx/"
 
@@ -39,8 +43,20 @@ class DefaultAppContainer : AppContainer {
         retrofit.create(SicenetApi::class.java)
     }
 
+    // --- BASE DE DATOS LOCAL (Lo nuevo) ---
+
+    // 3. Inicializamos la Base de Datos usando el contexto
+    private val database: SicenetDatabase by lazy {
+        SicenetDatabase.getDatabase(context)
+    }
+
+    // 4. Extraemos el DAO (el "bibliotecario")
+    override val alumnoDao: AlumnoDao by lazy {
+        database.alumnoDao()
+    }
+
     // 4. Construimos nuestro repositorio pasándole el servicio
     override val sicenetRepository: SicenetRepository by lazy {
-        NetworkSicenetRepository(retrofitService)
+        NetworkSicenetRepository(retrofitService, alumnoDao)
     }
 }
