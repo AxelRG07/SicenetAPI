@@ -1,6 +1,5 @@
 package com.example.sicenetapi.ui.screens
 
-import android.util.Base64
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardOptions
@@ -10,15 +9,10 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import androidx.navigation.NavController
-import com.example.sicenetapi.data.local.Alumno
-import com.example.sicenetapi.navigation.AcademicDataDestination
-import com.example.sicenetapi.ui.MainViewModel
 
 @Composable
 fun SicenetScreen(
@@ -27,6 +21,14 @@ fun SicenetScreen(
 ) {
     var matricula by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
+
+    val alumnoLogueado = viewModel.alumnoLocal.collectAsState().value
+
+    LaunchedEffect(alumnoLogueado) {
+        if (alumnoLogueado != null) {
+            onLoginSuccess()
+        }
+    }
 
     Column(modifier = Modifier
         .fillMaxHeight()
@@ -59,7 +61,7 @@ fun SicenetScreen(
         Button(
             //onClick = { viewModel.autenticar(matricula, password) },
             onClick = {
-                viewModel.autenticar(matricula, password) {
+                viewModel.iniciarSincronizacionPerfil(matricula, password) {
                     onLoginSuccess()
                 }
             },

@@ -5,12 +5,9 @@ import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
 
-// Si agregas más tablas en el futuro (Kardex, Calificaciones),
-// las añades al arreglo de entities y subes la versión.
 @Database(entities = [AlumnoEntity::class], version = 1, exportSchema = false)
 abstract class SicenetDatabase : RoomDatabase() {
 
-    // Define qué DAOs están disponibles
     abstract fun alumnoDao(): AlumnoDao
 
     companion object {
@@ -26,7 +23,6 @@ abstract class SicenetDatabase : RoomDatabase() {
                     SicenetDatabase::class.java,
                     "sicenet_offline_db"
                 )
-                    // Opcional para desarrollo: destruye y recrea la DB si cambias la versión
                     .fallbackToDestructiveMigration(false)
                     .build()
 

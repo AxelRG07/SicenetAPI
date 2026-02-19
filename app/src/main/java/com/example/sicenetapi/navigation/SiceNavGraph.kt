@@ -1,17 +1,12 @@
 package com.example.sicenetapi.navigation
 
-import android.R.attr.type
-import android.util.Base64
-import android.util.Log
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.viewmodel.compose.viewModel
-import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import androidx.navigation.navArgument
-import com.example.sicenetapi.ui.MainViewModel
+import com.example.sicenetapi.ui.screens.MainViewModel
 import com.example.sicenetapi.ui.screens.AcademicDataScreen
 import com.example.sicenetapi.ui.screens.SicenetScreen
 
@@ -32,7 +27,10 @@ fun SiceNavGraph(
             SicenetScreen(
                 viewModel = sharedViewModel,
                 onLoginSuccess = {
-                    navController.navigate(AcademicDataDestination.route)
+                    navController.navigate(AcademicDataDestination.route) {
+                        popUpTo(HomeDestination.route) { inclusive = true }
+                    }
+
                 }
             )
         }
@@ -40,7 +38,14 @@ fun SiceNavGraph(
         composable (
             route = AcademicDataDestination.route
         ){
-            AcademicDataScreen(viewModel = sharedViewModel)
+            AcademicDataScreen(
+                viewModel = sharedViewModel,
+                onLogOut = {
+                    navController.navigate(HomeDestination.route) {
+                        popUpTo(AcademicDataDestination.route) { inclusive = true }
+                    }
+                }
+            )
         }
 
     }

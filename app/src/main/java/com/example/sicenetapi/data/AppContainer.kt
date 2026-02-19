@@ -43,14 +43,14 @@ class DefaultAppContainer(private val context: Context) : AppContainer {
         retrofit.create(SicenetApi::class.java)
     }
 
-    // --- BASE DE DATOS LOCAL (Lo nuevo) ---
+    // BASE DE DATOS LOCAL
 
     // 3. Inicializamos la Base de Datos usando el contexto
     private val database: SicenetDatabase by lazy {
         SicenetDatabase.getDatabase(context)
     }
 
-    // 4. Extraemos el DAO (el "bibliotecario")
+    // 4. Extraemos el DAO
     override val alumnoDao: AlumnoDao by lazy {
         database.alumnoDao()
     }
