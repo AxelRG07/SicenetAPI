@@ -4,6 +4,7 @@ import android.content.Context
 import com.example.sicenetapi.data.NetworkSicenetRepository
 import com.example.sicenetapi.data.SicenetRepository
 import com.example.sicenetapi.data.local.AlumnoDao
+import com.example.sicenetapi.data.local.CargaAcademicaDao
 import com.example.sicenetapi.data.local.SicenetDatabase
 import com.example.sicenetapi.network.SessionCookieJar
 import com.example.sicenetapi.network.SicenetApi
@@ -15,6 +16,8 @@ import retrofit2.converter.scalars.ScalarsConverterFactory
 interface AppContainer {
     val sicenetRepository: SicenetRepository
     val alumnoDao: AlumnoDao
+    val cargaAcademicaDao: CargaAcademicaDao
+    val cookieJar: SessionCookieJar
 }
 
 class DefaultAppContainer(private val context: Context) : AppContainer {
@@ -25,9 +28,11 @@ class DefaultAppContainer(private val context: Context) : AppContainer {
         level = HttpLoggingInterceptor.Level.BODY
     }
 
+    override val cookieJar = SessionCookieJar()
+
     // 1. Construimos el cliente OkHttp con las cookies
     private val okHttpClient = OkHttpClient.Builder()
-        .cookieJar(SessionCookieJar())
+        .cookieJar(cookieJar)
         .addNetworkInterceptor(loggingInterceptor)
         .build()
 
@@ -54,6 +59,11 @@ class DefaultAppContainer(private val context: Context) : AppContainer {
     override val alumnoDao: AlumnoDao by lazy {
         database.alumnoDao()
     }
+
+    override val cargaAcademicaDao: CargaAcademicaDao by lazy {
+        database.cargaAcademicaDao()
+    }
+
 
     // 4. Construimos nuestro repositorio pasándole el servicio
     override val sicenetRepository: SicenetRepository by lazy {

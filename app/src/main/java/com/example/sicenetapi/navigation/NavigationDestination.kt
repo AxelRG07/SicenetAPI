@@ -14,3 +14,9 @@ object AcademicDataDestination : NavigationDestination {
     override val route = "academic_data"
     override val titleRes = "Academic Data"
 }
+
+object CargaAcademicaDestination : NavigationDestination {
+    override val route = "carga_academica"
+    override val titleRes = "Carga Académica"
+
+}

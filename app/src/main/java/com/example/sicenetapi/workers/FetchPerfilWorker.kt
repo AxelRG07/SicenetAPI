@@ -31,8 +31,11 @@ class FetchPerfilWorker(
                 if (perfilResult.isSuccess) {
                     val alumno = perfilResult.getOrNull()!!
 
-                    // 4. Empaquetar los datos de salida para el SIGUIENTE Worker
-                    // La clase Data es como un diccionario (Llave - Valor)
+                    val cargaAcademicaResult = repository.getCargaAcademica()
+
+                    Log.d("cargaAcademica", cargaAcademicaResult.toString())
+
+                    // 4. Empaquetar los datos de salida para el siguiente Worker
                     val outputData = Data.Builder()
                         .putString("matricula", alumno.matricula)
                         .putString("nombre", alumno.nombre)

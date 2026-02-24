@@ -5,14 +5,21 @@ import okhttp3.CookieJar
 import okhttp3.HttpUrl
 
 class SessionCookieJar : CookieJar {
-    private val cookieStore = mutableListOf<Cookie>()
+    private val cookieStore = HashMap<String, Cookie>()
 
     override fun saveFromResponse(url: HttpUrl, cookies: List<Cookie>) {
-        cookieStore.clear()
-        cookieStore.addAll(cookies)
+        for (cookie in cookies) {
+            if (!cookie.name.contains("ANONYMOUS", ignoreCase = true)) {
+                cookieStore[cookie.name] = cookie
+            }
+        }
     }
 
     override fun loadForRequest(url: HttpUrl): List<Cookie> {
-        return cookieStore
+        return cookieStore.values.toList()
+    }
+
+    fun clearSession() {
+        cookieStore.clear()
     }
 }

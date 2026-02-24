@@ -8,6 +8,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.example.sicenetapi.ui.screens.MainViewModel
 import com.example.sicenetapi.ui.screens.AcademicDataScreen
+import com.example.sicenetapi.ui.screens.CargaAcademicaScreen
 import com.example.sicenetapi.ui.screens.SicenetScreen
 
 @Composable
@@ -44,7 +45,16 @@ fun SiceNavGraph(
                     navController.navigate(HomeDestination.route) {
                         popUpTo(AcademicDataDestination.route) { inclusive = true }
                     }
-                }
+                },
+                navController = navController
+            )
+        }
+
+        composable (
+            route = CargaAcademicaDestination.route
+        ) {
+            CargaAcademicaScreen(
+                viewModel = sharedViewModel
             )
         }
 

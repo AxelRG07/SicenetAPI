@@ -2,7 +2,9 @@ package com.example.sicenetapi.data
 
 import android.util.Log
 import com.example.sicenetapi.data.local.AlumnoDao
+import com.example.sicenetapi.data.local.CargaAcademicaEntity
 import com.example.sicenetapi.network.SicenetApi
+import org.json.JSONArray
 import org.json.JSONObject
 
 class NetworkSicenetRepository(
@@ -64,7 +66,7 @@ class NetworkSicenetRepository(
         }
     }
 
-    override suspend fun getCargaAcademica(): Result<String> {
+    override suspend fun getCargaAcademica(): Result<List<CargaAcademicaEntity>> {
         val soapXml = """
             <?xml version="1.0" encoding="utf-8"?>
             <soap:Envelope xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/">
@@ -78,12 +80,35 @@ class NetworkSicenetRepository(
             val response = api.getCargaAcademica(soapXml)
             if (response.isSuccessful && response.body() != null) {
                 val xml = response.body()!!
+                val jsonString = xml
+                    .substringAfter("<getCargaAcademicaByAlumnoResult>")
+                    .substringBefore("</getCargaAcademicaByAlumnoResult>")
 
-                val cargaAcademica = xml
-                Log.d("datosCargaAcademica", xml)
+                val jsonArray = JSONArray(jsonString)
+                val listaMaterias = mutableListOf<CargaAcademicaEntity>()
+                val timestamp = System.currentTimeMillis()
 
-                Result.success(cargaAcademica)
+                for (i in 0 until jsonArray.length()) {
+                    val jsonMateria = jsonArray.getJSONObject(i)
+
+                    listaMaterias.add(
+                        CargaAcademicaEntity(
+                            materia = jsonMateria.optString("Materia", "Sin nombre"),
+                            docente = jsonMateria.optString("Docente", "Sin asignar"),
+                            grupo = jsonMateria.optString("Grupo", "-"),
+                            creditos = jsonMateria.optString("CreditosMateria", "0"),
+                            fechaSincronizacion = timestamp
+                        )
+                    )
+                }
+
+//                val cargaAcademica = xml
+//                Log.d("datosCargaAcademica", xml)
+
+                Result.success(listaMaterias)
             } else {
+                val errorBody = response.errorBody()?.string()
+                Log.e("ErrorCargaAcademica", errorBody ?: "Error body nulo")
                 Result.failure(Exception("Error Carga Académica: ${response.code()}"))
             }
         } catch (e: Exception) {

@@ -22,10 +22,14 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavController
 import com.example.sicenetapi.data.local.AlumnoEntity
+import com.example.sicenetapi.navigation.CargaAcademicaDestination
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -33,18 +37,26 @@ import java.util.Locale
 @Composable
 fun AcademicDataScreen(
     viewModel: MainViewModel = viewModel(),
-    onLogOut: () -> Unit
+    onLogOut: () -> Unit,
+    navController: NavController
 ) {
     val alumnoState = viewModel.alumnoLocal.collectAsState()
     val alumno = alumnoState.value
 
+    val context = LocalContext.current
+
     // UI
-    Column(modifier = Modifier.fillMaxSize().padding(16.dp)) {
+    Column(
+        modifier = Modifier.fillMaxSize()
+            .padding(16.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center
+    ) {
         if (alumno != null) {
             // Mostramos la tarjeta del estudiante
             StudentCard(alumno)
 
-            // REQUISITO DE EVALUACIÓN: Mostrar fecha de última actualización
+            // Mostrar fecha de última actualización
             Spacer(modifier = Modifier.height(16.dp))
             val fechaFormateada = SimpleDateFormat("dd/MM/yyyy HH:mm:ss", Locale.getDefault())
                 .format(Date(alumno.fechaSincronizacion))
@@ -57,13 +69,23 @@ fun AcademicDataScreen(
 
             Button(
                 onClick = {
-                    viewModel.cerrarSesion()
-                    onLogOut()
+                    viewModel.cerrarSesion(context = context) {
+                        onLogOut()
+                    }
                 },
-
                 modifier = Modifier.fillMaxWidth()
             ) {
                 Text("Cerrar Sesión")
+            }
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            Button(
+                onClick = {
+                    navController.navigate(CargaAcademicaDestination.route)
+                }
+            ) {
+                Text("Carga Académica")
             }
 
         } else {
@@ -89,7 +111,7 @@ fun StudentCard(
             verticalArrangement = Arrangement.Center
         ) {
             // Encabezado con Nombre y Matrícula
-            Text(text = alumno.nombre, style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
+            Text(text = alumno.nombre, style = MaterialTheme.typography.titleLarge, textAlign = TextAlign.Center, fontWeight = FontWeight.Bold)
             Text(text = alumno.matricula, style = MaterialTheme.typography.titleMedium, color = MaterialTheme.colorScheme.primary)
 
             HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
@@ -105,8 +127,8 @@ fun StudentCard(
 
 @Composable
 fun LabeledText(label: String, value: String) {
-    Row(modifier = Modifier.padding(vertical = 2.dp)) {
-        Text(text = label, fontWeight = FontWeight.SemiBold, modifier = Modifier.width(100.dp))
-        Text(text = value)
+    Column(modifier = Modifier.padding(vertical = 5.dp)) {
+        Text(text = label, fontWeight = FontWeight.SemiBold, textAlign = TextAlign.Center,modifier = Modifier.fillMaxWidth())
+        Text(text = value, modifier = Modifier.fillMaxWidth(), textAlign = TextAlign.Center)
     }
 }

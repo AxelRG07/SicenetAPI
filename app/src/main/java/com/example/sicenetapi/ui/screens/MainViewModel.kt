@@ -21,9 +21,13 @@ import androidx.work.WorkManager
 import com.example.sicenet.workers.SavePerfilWorker
 import com.example.sicenetapi.SicenetApplication
 import com.example.sicenetapi.data.Alumno
+import com.example.sicenetapi.data.AppContainer
 import com.example.sicenetapi.data.SicenetRepository
 import com.example.sicenetapi.data.local.AlumnoDao
+import com.example.sicenetapi.data.local.CargaAcademicaDao
+import com.example.sicenetapi.workers.FetchCargaWorker
 import com.example.sicenetapi.workers.FetchPerfilWorker
+import com.example.sicenetapi.workers.SaveCargaWorker
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
@@ -31,6 +35,7 @@ import kotlinx.coroutines.launch
 class MainViewModel(
     private val repository: SicenetRepository,
     private val alumnoDao: AlumnoDao,
+    private val cargaAcademicaDao: CargaAcademicaDao,
     private val workManager: WorkManager
 ) : ViewModel() {
 
@@ -44,6 +49,9 @@ class MainViewModel(
 
     val alumnoLocal = alumnoDao.getPerfilActual()
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), null)
+
+    val cargaAcademicaLocal = cargaAcademicaDao.getCargaAcademica()
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
 
     /*fun autenticar(mat: String, pass: String, onSuccesss: () -> Unit) {
         viewModelScope.launch {
@@ -130,9 +138,59 @@ class MainViewModel(
         }
     }
 
-    fun cerrarSesion() {
+    fun sincronizarCargaAcademica() {
+        isLoading = true
+        errorMessage = ""
+
+        // 1. Creamos la petición 1
+        val fetchRequest = OneTimeWorkRequestBuilder<FetchCargaWorker>()
+            .setExpedited(OutOfQuotaPolicy.RUN_AS_NON_EXPEDITED_WORK_REQUEST)
+            .build()
+
+        // 2. Creamos la petición 2
+        val saveRequest = OneTimeWorkRequestBuilder<SaveCargaWorker>().build()
+
+        val workName = "SyncCarga"
+
+        // 3. Encadenamos (Chaining)
+        workManager.beginUniqueWork(workName, ExistingWorkPolicy.REPLACE, fetchRequest)
+            .then(saveRequest)
+            .enqueue()
+
+        // 4. Observamos el progreso para quitar la ruedita de carga
         viewModelScope.launch {
-            alumnoDao.borrarSesion()
+            workManager.getWorkInfosForUniqueWorkFlow(workName).collect { workInfos ->
+                if (workInfos.isNotEmpty()) {
+                    val isFinished = workInfos.all { it.state.isFinished }
+                    val hasFailed = workInfos.any { it.state == WorkInfo.State.FAILED }
+
+                    if (isFinished) {
+                        isLoading = false
+                        if (hasFailed) {
+                            errorMessage = "Error al obtener la carga académica."
+                        }
+                    } else {
+                        isLoading = true
+                    }
+                }
+            }
+        }
+    }
+
+    fun cerrarSesion(context: Context, onLogoutComplete: () -> Unit) {
+        viewModelScope.launch {
+            val appContainer = (context.applicationContext as SicenetApplication).container
+
+            appContainer.alumnoDao.borrarSesion()
+            appContainer.cargaAcademicaDao.borrarCarga()
+
+            appContainer.cookieJar.clearSession()
+
+            workManager.cancelAllWork()
+
+            errorMessage = ""
+
+            onLogoutComplete()
         }
     }
 
@@ -151,6 +209,7 @@ class MainViewModel(
                 MainViewModel(
                     repository = sicenetRepository,
                     alumnoDao = appContainer.alumnoDao,
+                    cargaAcademicaDao = appContainer.cargaAcademicaDao,
                     workManager = WorkManager.getInstance(application.applicationContext)
                 )
             }
