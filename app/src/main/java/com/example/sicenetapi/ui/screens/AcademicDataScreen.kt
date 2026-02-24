@@ -2,13 +2,11 @@ package com.example.sicenetapi.ui.screens
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
@@ -30,6 +28,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.example.sicenetapi.data.local.AlumnoEntity
 import com.example.sicenetapi.navigation.CalifFinalDestination
+import com.example.sicenetapi.navigation.CalifUnidadesDestination
 import com.example.sicenetapi.navigation.CargaAcademicaDestination
 import com.example.sicenetapi.navigation.KardexDestination
 import java.text.SimpleDateFormat
@@ -108,6 +107,16 @@ fun AcademicDataScreen(
                 }
             ) {
                 Text("Calificaciones Finales")
+            }
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            Button(
+                onClick = {
+                    navController.navigate(CalifUnidadesDestination.route)
+                }
+            ) {
+                Text("Calificaciones Parciales")
             }
 
         } else {

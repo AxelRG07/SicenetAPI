@@ -1,6 +1,7 @@
 package com.example.sicenetapi.data
 
 import com.example.sicenetapi.data.local.CalifFinalEntity
+import com.example.sicenetapi.data.local.CalifUnidadesEntity
 import com.example.sicenetapi.data.local.CargaAcademicaEntity
 import com.example.sicenetapi.data.local.KardexEntity
 
@@ -10,6 +11,6 @@ interface SicenetRepository {
     suspend fun getCargaAcademica(): Result<List<CargaAcademicaEntity>>
     suspend fun getKardex(lineamiento: Int): Result<List<KardexEntity>>
     suspend fun getCalifFinal(modEducativo: Int): Result<List<CalifFinalEntity>>
-    suspend fun getCalifUnidades(): Result<String>
+    suspend fun getCalifUnidades(): Result<List<CalifUnidadesEntity>>
 }
 

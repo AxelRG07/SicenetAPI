@@ -30,3 +30,8 @@ object CalifFinalDestination : NavigationDestination {
     override val route = "calif_final"
     override val titleRes = "Calificaciones Finales"
 }
+
+object CalifUnidadesDestination : NavigationDestination {
+    override val route = "calif_unidades"
+    override val titleRes = "Calificaciones Unidades"
+}

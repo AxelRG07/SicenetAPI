@@ -5,6 +5,7 @@ import com.example.sicenetapi.data.NetworkSicenetRepository
 import com.example.sicenetapi.data.SicenetRepository
 import com.example.sicenetapi.data.local.AlumnoDao
 import com.example.sicenetapi.data.local.CalifFinalDao
+import com.example.sicenetapi.data.local.CalifUnidadesDao
 import com.example.sicenetapi.data.local.CargaAcademicaDao
 import com.example.sicenetapi.data.local.KardexDao
 import com.example.sicenetapi.data.local.SicenetDatabase
@@ -21,6 +22,7 @@ interface AppContainer {
     val cargaAcademicaDao: CargaAcademicaDao
     val kardexDao: KardexDao
     val califFinalDao: CalifFinalDao
+    val califUnidadesDao: CalifUnidadesDao
     val cookieJar: SessionCookieJar
 }
 
@@ -74,6 +76,10 @@ class DefaultAppContainer(private val context: Context) : AppContainer {
 
     override val califFinalDao: CalifFinalDao by lazy {
         database.califFinalDao()
+    }
+
+    override val califUnidadesDao: CalifUnidadesDao by lazy {
+        database.califUnidadesDao()
     }
 
     // 4. Construimos nuestro repositorio pasándole el servicio

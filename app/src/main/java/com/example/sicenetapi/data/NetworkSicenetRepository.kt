@@ -3,11 +3,10 @@ package com.example.sicenetapi.data
 import android.util.Log
 import com.example.sicenetapi.data.local.AlumnoDao
 import com.example.sicenetapi.data.local.CalifFinalEntity
+import com.example.sicenetapi.data.local.CalifUnidadesEntity
 import com.example.sicenetapi.data.local.CargaAcademicaEntity
 import com.example.sicenetapi.data.local.KardexEntity
 import com.example.sicenetapi.network.SicenetApi
-import okhttp3.MediaType.Companion.toMediaTypeOrNull
-import okhttp3.RequestBody.Companion.toRequestBody
 import org.json.JSONArray
 import org.json.JSONObject
 
@@ -245,7 +244,7 @@ class NetworkSicenetRepository(
         }
     }
 
-    override suspend fun getCalifUnidades(): Result<String> {
+    override suspend fun getCalifUnidades(): Result<List<CalifUnidadesEntity>> {
         val soapXml = """
             <?xml version="1.0" encoding="utf-8"?>
             <soap:Envelope xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/">
@@ -260,10 +259,52 @@ class NetworkSicenetRepository(
             if (response.isSuccessful && response.body() != null) {
                 val xml = response.body()!!
 
-                val califUnidades = xml
-                Log.d("califUnidades", xml)
+                if (xml.contains("<html", ignoreCase = true)) {
+                    return Result.failure(Exception("Servidor devolvió HTML"))
+                }
 
-                Result.success(califUnidades)
+                val regex = "\\[.*\\]".toRegex(RegexOption.DOT_MATCHES_ALL)
+                val matchResult = regex.find(xml)
+
+                if (matchResult == null) {
+                    return Result.failure(Exception("JSON no encontrado"))
+                }
+
+                val jsonArray = org.json.JSONArray(matchResult.value)
+                val listaUnidades = mutableListOf<CalifUnidadesEntity>()
+                val timestamp = System.currentTimeMillis()
+
+                for (i in 0 until jsonArray.length()) {
+                    val obj = jsonArray.getJSONObject(i)
+
+                    // ¡Transformamos el "1111" en un número entero!
+                    val strUnidades = obj.optString("UnidadesActivas", "")
+                    val cantidadUnidades = strUnidades.length
+
+                    listaUnidades.add(
+                        CalifUnidadesEntity(
+                            materia = obj.optString("Materia", ""),
+                            grupo = obj.optString("Grupo", ""),
+                            observaciones = obj.optString("Observaciones", ""),
+                            unidadesActivas = cantidadUnidades,
+                            c1 = obj.optString("C1", "0").takeIf { it != "null" } ?: "0",
+                            c2 = obj.optString("C2", "0").takeIf { it != "null" } ?: "0",
+                            c3 = obj.optString("C3", "0").takeIf { it != "null" } ?: "0",
+                            c4 = obj.optString("C4", "0").takeIf { it != "null" } ?: "0",
+                            c5 = obj.optString("C5", "0").takeIf { it != "null" } ?: "0",
+                            c6 = obj.optString("C6", "0").takeIf { it != "null" } ?: "0",
+                            c7 = obj.optString("C7", "0").takeIf { it != "null" } ?: "0",
+                            c8 = obj.optString("C8", "0").takeIf { it != "null" } ?: "0",
+                            c9 = obj.optString("C9", "0").takeIf { it != "null" } ?: "0",
+                            c10 = obj.optString("C10", "0").takeIf { it != "null" } ?: "0",
+                            c11 = obj.optString("C11", "0").takeIf { it != "null" } ?: "0",
+                            c12 = obj.optString("C12", "0").takeIf { it != "null" } ?: "0",
+                            c13 = obj.optString("C13", "0").takeIf { it != "null" } ?: "0",
+                            fechaSincronizacion = timestamp
+                        )
+                    )
+                }
+                Result.success(listaUnidades)
             } else {
                 Result.failure(Exception("Error califUnidades: ${response.code()}"))
             }

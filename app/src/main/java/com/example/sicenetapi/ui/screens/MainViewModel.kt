@@ -26,10 +26,12 @@ import com.example.sicenetapi.data.SicenetRepository
 import com.example.sicenetapi.data.local.AlumnoDao
 import com.example.sicenetapi.data.local.CargaAcademicaDao
 import com.example.sicenetapi.workers.FetchCalifFinalWorker
+import com.example.sicenetapi.workers.FetchCalifUnidadesWorker
 import com.example.sicenetapi.workers.FetchCargaWorker
 import com.example.sicenetapi.workers.FetchKardexWorker
 import com.example.sicenetapi.workers.FetchPerfilWorker
 import com.example.sicenetapi.workers.SaveCalifFinalWorker
+import com.example.sicenetapi.workers.SaveCalifUnidadesWorker
 import com.example.sicenetapi.workers.SaveCargaWorker
 import com.example.sicenetapi.workers.SaveKardexWorker
 import kotlinx.coroutines.flow.SharingStarted
@@ -60,6 +62,9 @@ class MainViewModel(
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
 
     val califFinalLocal = container.califFinalDao.getCalifFinal()
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
+
+    val califUnidadesLocal = container.califUnidadesDao.getCalifUnidades()
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
 
     /*fun autenticar(mat: String, pass: String, onSuccesss: () -> Unit) {
@@ -256,6 +261,42 @@ class MainViewModel(
         }
     }
 
+    fun sincronizarCalifUnidades() {
+        isLoading = true
+        errorMessage = ""
+
+        val fetchRequest = OneTimeWorkRequestBuilder<FetchCalifUnidadesWorker>()
+            .setExpedited(OutOfQuotaPolicy.RUN_AS_NON_EXPEDITED_WORK_REQUEST)
+            .build()
+
+        val saveRequest = OneTimeWorkRequestBuilder<SaveCalifUnidadesWorker>().build()
+
+        val workName = "SyncCalifUnidades"
+
+        workManager.beginUniqueWork(workName, ExistingWorkPolicy.REPLACE, fetchRequest)
+            .then(saveRequest)
+            .enqueue()
+
+        // Monitoreo
+        viewModelScope.launch {
+            workManager.getWorkInfosForUniqueWorkFlow(workName).collect { workInfos ->
+                if (workInfos.isNotEmpty()) {
+                    val isFinished = workInfos.all { it.state.isFinished }
+                    val hasFailed = workInfos.any { it.state == WorkInfo.State.FAILED }
+
+                    if (isFinished) {
+                        isLoading = false
+                        if (hasFailed) {
+                            errorMessage = "Error al obtener Calificaciones por Unidad."
+                        }
+                    } else {
+                        isLoading = true
+                    }
+                }
+            }
+        }
+    }
+
     fun cerrarSesion(context: Context, onLogoutComplete: () -> Unit) {
         viewModelScope.launch {
             val appContainer = (context.applicationContext as SicenetApplication).container
@@ -264,6 +305,7 @@ class MainViewModel(
             appContainer.cargaAcademicaDao.borrarCarga()
             appContainer.kardexDao.borrarKardex()
             appContainer.califFinalDao.borrarCalifFinal()
+            appContainer.califUnidadesDao.borrarCalifUnidades()
 
             appContainer.cookieJar.clearSession()
 

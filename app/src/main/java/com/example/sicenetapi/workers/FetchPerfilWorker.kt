@@ -39,6 +39,8 @@ class FetchPerfilWorker(
 
                     Log.d("cargaAcademica", cargaAcademicaResult.toString())
 
+                    Log.d("califUnidades", repository.getCalifUnidades().toString())
+
                     // 4. Empaquetar los datos de salida para el siguiente Worker
                     val outputData = Data.Builder()
                         .putString("matricula", alumno.matricula)
