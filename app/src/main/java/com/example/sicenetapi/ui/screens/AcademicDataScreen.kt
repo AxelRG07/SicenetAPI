@@ -29,7 +29,9 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.example.sicenetapi.data.local.AlumnoEntity
+import com.example.sicenetapi.navigation.CalifFinalDestination
 import com.example.sicenetapi.navigation.CargaAcademicaDestination
+import com.example.sicenetapi.navigation.KardexDestination
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -86,6 +88,26 @@ fun AcademicDataScreen(
                 }
             ) {
                 Text("Carga Académica")
+            }
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            Button(
+                onClick = {
+                    navController.navigate(KardexDestination.route)
+                }
+            ) {
+                Text("Kardex")
+            }
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            Button(
+                onClick = {
+                    navController.navigate(CalifFinalDestination.route)
+                }
+            ) {
+                Text("Calificaciones Finales")
             }
 
         } else {

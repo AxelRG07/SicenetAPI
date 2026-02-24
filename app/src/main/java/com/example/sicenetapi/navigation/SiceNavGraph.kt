@@ -8,7 +8,9 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.example.sicenetapi.ui.screens.MainViewModel
 import com.example.sicenetapi.ui.screens.AcademicDataScreen
+import com.example.sicenetapi.ui.screens.CalifFinalScreen
 import com.example.sicenetapi.ui.screens.CargaAcademicaScreen
+import com.example.sicenetapi.ui.screens.KardexScreen
 import com.example.sicenetapi.ui.screens.SicenetScreen
 
 @Composable
@@ -58,5 +60,20 @@ fun SiceNavGraph(
             )
         }
 
+        composable (
+            route = KardexDestination.route
+        ) {
+            KardexScreen(
+                viewModel = sharedViewModel
+            )
+        }
+
+        composable (
+            route = CalifFinalDestination.route
+        ) {
+            CalifFinalScreen(
+                viewModel = sharedViewModel
+            )
+        }
     }
 }

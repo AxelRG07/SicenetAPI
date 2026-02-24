@@ -7,6 +7,7 @@ import androidx.room.PrimaryKey
 data class AlumnoEntity(
     @PrimaryKey
     val matricula: String,
+    val contrasena: String = "",
     val nombre: String,
     val carrera: String,
     val semestre: String,

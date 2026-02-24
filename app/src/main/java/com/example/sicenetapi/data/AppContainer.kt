@@ -4,7 +4,9 @@ import android.content.Context
 import com.example.sicenetapi.data.NetworkSicenetRepository
 import com.example.sicenetapi.data.SicenetRepository
 import com.example.sicenetapi.data.local.AlumnoDao
+import com.example.sicenetapi.data.local.CalifFinalDao
 import com.example.sicenetapi.data.local.CargaAcademicaDao
+import com.example.sicenetapi.data.local.KardexDao
 import com.example.sicenetapi.data.local.SicenetDatabase
 import com.example.sicenetapi.network.SessionCookieJar
 import com.example.sicenetapi.network.SicenetApi
@@ -17,6 +19,8 @@ interface AppContainer {
     val sicenetRepository: SicenetRepository
     val alumnoDao: AlumnoDao
     val cargaAcademicaDao: CargaAcademicaDao
+    val kardexDao: KardexDao
+    val califFinalDao: CalifFinalDao
     val cookieJar: SessionCookieJar
 }
 
@@ -64,6 +68,13 @@ class DefaultAppContainer(private val context: Context) : AppContainer {
         database.cargaAcademicaDao()
     }
 
+    override val kardexDao: KardexDao by lazy {
+        database.kardexDao()
+    }
+
+    override val califFinalDao: CalifFinalDao by lazy {
+        database.califFinalDao()
+    }
 
     // 4. Construimos nuestro repositorio pasándole el servicio
     override val sicenetRepository: SicenetRepository by lazy {

@@ -25,17 +25,20 @@ import com.example.sicenetapi.data.AppContainer
 import com.example.sicenetapi.data.SicenetRepository
 import com.example.sicenetapi.data.local.AlumnoDao
 import com.example.sicenetapi.data.local.CargaAcademicaDao
+import com.example.sicenetapi.workers.FetchCalifFinalWorker
 import com.example.sicenetapi.workers.FetchCargaWorker
+import com.example.sicenetapi.workers.FetchKardexWorker
 import com.example.sicenetapi.workers.FetchPerfilWorker
+import com.example.sicenetapi.workers.SaveCalifFinalWorker
 import com.example.sicenetapi.workers.SaveCargaWorker
+import com.example.sicenetapi.workers.SaveKardexWorker
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
 class MainViewModel(
     private val repository: SicenetRepository,
-    private val alumnoDao: AlumnoDao,
-    private val cargaAcademicaDao: CargaAcademicaDao,
+    private val container: AppContainer,
     private val workManager: WorkManager
 ) : ViewModel() {
 
@@ -47,10 +50,16 @@ class MainViewModel(
     var isLoading by mutableStateOf(false)
         private set
 
-    val alumnoLocal = alumnoDao.getPerfilActual()
+    val alumnoLocal = container.alumnoDao.getPerfilActual()
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), null)
 
-    val cargaAcademicaLocal = cargaAcademicaDao.getCargaAcademica()
+    val cargaAcademicaLocal = container.cargaAcademicaDao.getCargaAcademica()
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
+
+    val kardexLocal = container.kardexDao.getKardex()
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
+
+    val califFinalLocal = container.califFinalDao.getCalifFinal()
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
 
     /*fun autenticar(mat: String, pass: String, onSuccesss: () -> Unit) {
@@ -157,7 +166,6 @@ class MainViewModel(
             .then(saveRequest)
             .enqueue()
 
-        // 4. Observamos el progreso para quitar la ruedita de carga
         viewModelScope.launch {
             workManager.getWorkInfosForUniqueWorkFlow(workName).collect { workInfos ->
                 if (workInfos.isNotEmpty()) {
@@ -177,12 +185,85 @@ class MainViewModel(
         }
     }
 
+    fun sincronizarKardex() {
+        isLoading = true
+        errorMessage = ""
+
+        val fetchRequest = OneTimeWorkRequestBuilder<FetchKardexWorker>()
+            .setExpedited(OutOfQuotaPolicy.RUN_AS_NON_EXPEDITED_WORK_REQUEST)
+            .build()
+
+        val saveRequest = OneTimeWorkRequestBuilder<SaveKardexWorker>().build()
+
+        val workName = "SyncKardex"
+
+        workManager.beginUniqueWork(workName, ExistingWorkPolicy.REPLACE, fetchRequest)
+            .then(saveRequest)
+            .enqueue()
+
+        viewModelScope.launch {
+            workManager.getWorkInfosForUniqueWorkFlow(workName).collect { workInfos ->
+                if (workInfos.isNotEmpty()) {
+                    val isFinished = workInfos.all { it.state.isFinished }
+                    val hasFailed = workInfos.any { it.state == WorkInfo.State.FAILED }
+
+                    if (isFinished) {
+                        isLoading = false
+                        if (hasFailed) {
+                            errorMessage = "Error al obtener el Kardex."
+                        }
+                    } else {
+                        isLoading = true
+                    }
+                }
+            }
+        }
+    }
+
+    fun sincronizarCalifFinal() {
+        isLoading = true
+        errorMessage = ""
+
+        val fetchRequest = OneTimeWorkRequestBuilder<FetchCalifFinalWorker>()
+            .setExpedited(OutOfQuotaPolicy.RUN_AS_NON_EXPEDITED_WORK_REQUEST)
+            .build()
+
+        val saveRequest = OneTimeWorkRequestBuilder<SaveCalifFinalWorker>().build()
+
+        val workName = "SyncCalifFinal"
+
+        workManager.beginUniqueWork(workName, ExistingWorkPolicy.REPLACE, fetchRequest)
+            .then(saveRequest)
+            .enqueue()
+
+        // Monitoreo
+        viewModelScope.launch {
+            workManager.getWorkInfosForUniqueWorkFlow(workName).collect { workInfos ->
+                if (workInfos.isNotEmpty()) {
+                    val isFinished = workInfos.all { it.state.isFinished }
+                    val hasFailed = workInfos.any { it.state == WorkInfo.State.FAILED }
+
+                    if (isFinished) {
+                        isLoading = false
+                        if (hasFailed) {
+                            errorMessage = "Error al obtener Calificaciones Finales."
+                        }
+                    } else {
+                        isLoading = true
+                    }
+                }
+            }
+        }
+    }
+
     fun cerrarSesion(context: Context, onLogoutComplete: () -> Unit) {
         viewModelScope.launch {
             val appContainer = (context.applicationContext as SicenetApplication).container
 
             appContainer.alumnoDao.borrarSesion()
             appContainer.cargaAcademicaDao.borrarCarga()
+            appContainer.kardexDao.borrarKardex()
+            appContainer.califFinalDao.borrarCalifFinal()
 
             appContainer.cookieJar.clearSession()
 
@@ -193,7 +274,6 @@ class MainViewModel(
             onLogoutComplete()
         }
     }
-
 
     companion object {
         val Factory: ViewModelProvider.Factory = viewModelFactory {
@@ -208,8 +288,7 @@ class MainViewModel(
                 // Creamos e inyectamos el ViewModel
                 MainViewModel(
                     repository = sicenetRepository,
-                    alumnoDao = appContainer.alumnoDao,
-                    cargaAcademicaDao = appContainer.cargaAcademicaDao,
+                    container = appContainer,
                     workManager = WorkManager.getInstance(application.applicationContext)
                 )
             }

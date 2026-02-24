@@ -2,8 +2,12 @@ package com.example.sicenetapi.data
 
 import android.util.Log
 import com.example.sicenetapi.data.local.AlumnoDao
+import com.example.sicenetapi.data.local.CalifFinalEntity
 import com.example.sicenetapi.data.local.CargaAcademicaEntity
+import com.example.sicenetapi.data.local.KardexEntity
 import com.example.sicenetapi.network.SicenetApi
+import okhttp3.MediaType.Companion.toMediaTypeOrNull
+import okhttp3.RequestBody.Companion.toRequestBody
 import org.json.JSONArray
 import org.json.JSONObject
 
@@ -116,7 +120,7 @@ class NetworkSicenetRepository(
         }
     }
 
-    override suspend fun getKardex(lineamiento: Int): Result<String> {
+    override suspend fun getKardex(lineamiento: Int): Result<List<KardexEntity>> {
         val soapXml = """
             <?xml version="1.0" encoding="utf-8"?>
             <soap:Envelope xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/">
@@ -128,15 +132,55 @@ class NetworkSicenetRepository(
             </soap:Envelope>
         """.trimIndent()
 
+        Log.d("KardexRequest", "Enviando este XML:\n$soapXml")
+
         return try {
             val response = api.getKardex(soapXml)
             if (response.isSuccessful && response.body() != null) {
                 val xml = response.body()!!
 
-                val kardex = xml
-                Log.d("kardex", xml)
+                if (xml.contains("<html", ignoreCase = true)) {
+                    Log.e("KardexError", "El servidor devolvió un HTML en lugar del Kardex.")
+                    return Result.failure(Exception("Servidor devolvió HTML"))
+                }
 
-                Result.success(kardex)
+                val regex = "\\{.*\\}".toRegex(RegexOption.DOT_MATCHES_ALL)
+                val matchResult = regex.find(xml)
+
+                if (matchResult == null) {
+                    Log.e("KardexError", "No se encontró un JSON válido en el XML")
+                    return Result.failure(Exception("JSON no encontrado"))
+                }
+
+                //Log.d("KardexJSON", matchResult.toString())
+
+                val jsonString = matchResult.value
+
+                val rootObject = org.json.JSONObject(jsonString)
+
+                val jsonArray = rootObject.optJSONArray("lstKardex") ?: org.json.JSONArray()
+
+                val listaKardex = mutableListOf<KardexEntity>()
+                val timestamp = System.currentTimeMillis()
+
+                for (i in 0 until jsonArray.length()) {
+                    val obj = jsonArray.getJSONObject(i)
+
+                    val periodoFormateado = "${obj.optString("P1", "")} ${obj.optString("A1", "")}".trim()
+
+                    listaKardex.add(
+                        KardexEntity(
+                            claveMateria = obj.optString("ClvOfiMat", ""),
+                            materia = obj.optString("Materia", ""),
+                            calificacion = obj.optString("Calif", "0"),
+                            periodo = periodoFormateado,
+                            creditos = obj.optString("Cdts", "0"),
+                            fechaSincronizacion = timestamp
+                        )
+                    )
+                }
+
+                Result.success(listaKardex)
             } else {
                 Result.failure(Exception("Error Kardex: ${response.code()}"))
             }
@@ -145,7 +189,7 @@ class NetworkSicenetRepository(
         }
     }
 
-    override suspend fun getCalifFinal(modEducativo: Int): Result<String> {
+    override suspend fun getCalifFinal(modEducativo: Int): Result<List<CalifFinalEntity>> {
         val soapXml = """
             <?xml version="1.0" encoding="utf-8"?>
             <soap:Envelope xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/">
@@ -162,10 +206,37 @@ class NetworkSicenetRepository(
             if (response.isSuccessful && response.body() != null) {
                 val xml = response.body()!!
 
-                val califFinal = xml
-                Log.d("califFinal", xml)
+                if (xml.contains("<html", ignoreCase = true)) {
+                    return Result.failure(Exception("Servidor devolvió HTML"))
+                }
 
-                Result.success(califFinal)
+                val regex = "\\[.*\\]".toRegex(RegexOption.DOT_MATCHES_ALL)
+                val matchResult = regex.find(xml)
+
+                if (matchResult == null) {
+                    return Result.failure(Exception("JSON no encontrado"))
+                }
+
+                val jsonString = matchResult.value
+                val jsonArray = org.json.JSONArray(jsonString)
+                val listaCalif = mutableListOf<CalifFinalEntity>()
+                val timestamp = System.currentTimeMillis()
+
+                for (i in 0 until jsonArray.length()) {
+                    val obj = jsonArray.getJSONObject(i)
+                    listaCalif.add(
+                        CalifFinalEntity(
+                            materia = obj.optString("materia", ""),
+                            grupo = obj.optString("grupo", ""),
+                            calificacion = obj.optString("calif", "0"),
+                            acreditacion = obj.optString("acred", ""),
+                            observaciones = obj.optString("Observaciones", ""),
+                            fechaSincronizacion = timestamp
+                        )
+                    )
+                }
+                Result.success(listaCalif)
+
             } else {
                 Result.failure(Exception("Error califFinal: ${response.code()}"))
             }

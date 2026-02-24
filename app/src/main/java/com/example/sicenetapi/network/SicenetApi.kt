@@ -1,5 +1,6 @@
 package com.example.sicenetapi.network
 
+import okhttp3.RequestBody
 import retrofit2.http.Body
 import retrofit2.http.Headers
 import retrofit2.http.POST
@@ -23,9 +24,14 @@ interface SicenetApi {
     @POST("/ws/wsalumnos.asmx")
     suspend fun getCargaAcademica(@Body requestBody: String): retrofit2.Response<String>
 
-    @Headers("Content-Type: text/xml; charset=utf-8", "SOAPAction: \"http://tempuri.org/getAllKardexConPromedioByAlumno\"")
+    @Headers(
+        "Content-Type: text/xml; charset=utf-8",
+        "SOAPAction: \"http://tempuri.org/getAllKardexConPromedioByAlumno\""
+    )
     @POST("/ws/wsalumnos.asmx")
-    suspend fun getKardex(@Body requestBody: String): retrofit2.Response<String>
+    suspend fun getKardex(
+        @Body requestBody: String
+    ): retrofit2.Response<String>
 
     @Headers("Content-Type: text/xml; charset=utf-8", "SOAPAction: \"http://tempuri.org/getAllCalifFinalByAlumnos\"")
     @POST("/ws/wsalumnos.asmx")

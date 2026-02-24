@@ -6,14 +6,16 @@ import androidx.room.Room
 import androidx.room.RoomDatabase
 
 @Database(
-    entities = [AlumnoEntity::class, CargaAcademicaEntity::class],
-    version = 2,
+    entities = [AlumnoEntity::class, CargaAcademicaEntity::class, KardexEntity::class, CalifFinalEntity::class],
+    version = 5,
     exportSchema = false
 )
 abstract class SicenetDatabase : RoomDatabase() {
 
     abstract fun alumnoDao(): AlumnoDao
     abstract fun cargaAcademicaDao(): CargaAcademicaDao
+    abstract fun kardexDao(): KardexDao
+    abstract fun califFinalDao(): CalifFinalDao
 
     companion object {
         @Volatile

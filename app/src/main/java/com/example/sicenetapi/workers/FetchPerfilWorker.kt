@@ -33,11 +33,16 @@ class FetchPerfilWorker(
 
                     val cargaAcademicaResult = repository.getCargaAcademica()
 
+                    val califFinalResult = repository.getCalifFinal(alumno.modEducativo)
+
+                    Log.d("califFinal", califFinalResult.toString())
+
                     Log.d("cargaAcademica", cargaAcademicaResult.toString())
 
                     // 4. Empaquetar los datos de salida para el siguiente Worker
                     val outputData = Data.Builder()
                         .putString("matricula", alumno.matricula)
+                        .putString("contrasena", password)
                         .putString("nombre", alumno.nombre)
                         .putString("carrera", alumno.carrera)
                         .putString("semestre", alumno.semestre)
