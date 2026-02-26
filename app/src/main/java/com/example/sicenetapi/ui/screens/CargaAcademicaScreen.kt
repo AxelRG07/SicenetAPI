@@ -11,6 +11,7 @@ import androidx.compose.ui.unit.dp
 import com.example.sicenetapi.data.local.CargaAcademicaEntity
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import java.text.SimpleDateFormat
@@ -22,6 +23,12 @@ fun CargaAcademicaScreen(
     viewModel: MainViewModel
 ) {
     val listaMaterias by viewModel.cargaAcademicaLocal.collectAsState()
+
+    LaunchedEffect(listaMaterias) {
+        if (listaMaterias.isNullOrEmpty()) {
+            viewModel.sincronizarCargaAcademica()
+        }
+    }
 
     Column(
         modifier = Modifier.fillMaxSize().padding(32.dp),

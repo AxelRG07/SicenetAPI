@@ -9,6 +9,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
@@ -97,6 +98,12 @@ fun MateriaUnidadesCard(materia: CalifUnidadesEntity) {
 @Composable
 fun CalifUnidadesScreen(viewModel: MainViewModel) {
     val listaUnidades by viewModel.califUnidadesLocal.collectAsState()
+
+    LaunchedEffect(listaUnidades) {
+        if (listaUnidades.isNullOrEmpty()) {
+            viewModel.sincronizarCalifUnidades()
+        }
+    }
 
     Column(modifier = Modifier.fillMaxSize().padding(16.dp)) {
         Text(

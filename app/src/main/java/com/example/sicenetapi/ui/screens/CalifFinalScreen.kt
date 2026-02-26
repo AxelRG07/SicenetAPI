@@ -11,6 +11,7 @@ import androidx.compose.ui.unit.dp
 import com.example.sicenetapi.data.local.CalifFinalEntity
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import java.text.SimpleDateFormat
@@ -20,6 +21,12 @@ import java.util.Locale
 @Composable
 fun CalifFinalScreen(viewModel: MainViewModel) {
     val listaCalif by viewModel.califFinalLocal.collectAsState()
+
+    LaunchedEffect(listaCalif) {
+        if (listaCalif.isNullOrEmpty()) {
+            viewModel.sincronizarCalifFinal()
+        }
+    }
 
     Column(modifier = Modifier.fillMaxSize().padding(16.dp)) {
 

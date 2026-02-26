@@ -11,6 +11,7 @@ import androidx.compose.ui.unit.dp
 import com.example.sicenetapi.data.local.KardexEntity
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import java.text.SimpleDateFormat
@@ -20,6 +21,12 @@ import java.util.Locale
 @Composable
 fun KardexScreen(viewModel: MainViewModel) {
     val listaKardex by viewModel.kardexLocal.collectAsState()
+
+    LaunchedEffect(listaKardex) {
+        if (listaKardex.isNullOrEmpty()) {
+            viewModel.sincronizarKardex()
+        }
+    }
 
     Column(modifier = Modifier.fillMaxSize().padding(16.dp)) {
 
