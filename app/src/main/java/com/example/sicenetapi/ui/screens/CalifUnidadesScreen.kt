@@ -62,12 +62,12 @@ fun MateriaUnidadesCard(materia: CalifUnidadesEntity) {
 
                     val colorFondo = when {
                         califNum == 0 -> Color.LightGray.copy(alpha = 0.5f)
-                        califNum >= 70 -> Color(0xFFE8F5E9) // Verde clarito
-                        else -> Color(0xFFFFEBEE) // Rojo clarito
+                        califNum >= 70 -> Color(0xFFE8F5E9)
+                        else -> Color(0xFFFFEBEE)
                     }
                     val colorTexto = when {
                         califNum == 0 -> Color.DarkGray
-                        califNum >= 70 -> Color(0xFF2E7D32) // Verde fuerte
+                        califNum >= 70 -> Color(0xFF2E7D32)
                         else -> MaterialTheme.colorScheme.error
                     }
 
@@ -79,7 +79,7 @@ fun MateriaUnidadesCard(materia: CalifUnidadesEntity) {
                             .padding(horizontal = 12.dp, vertical = 8.dp)
                     ) {
                         Text(
-                            text = "U${i + 1}", // U1, U2, U3...
+                            text = "U${i + 1}",
                             style = MaterialTheme.typography.labelSmall,
                             color = Color.Gray
                         )

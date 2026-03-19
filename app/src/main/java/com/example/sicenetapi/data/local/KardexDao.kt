@@ -16,4 +16,7 @@ interface KardexDao {
 
     @Query("DELETE FROM kardex_alumno")
     suspend fun borrarKardex()
+
+    @Query("SELECT * FROM kardex_alumno")
+    fun getKardexCursor(): android.database.Cursor
 }

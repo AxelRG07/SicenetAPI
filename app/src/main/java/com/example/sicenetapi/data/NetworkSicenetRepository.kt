@@ -29,8 +29,11 @@ class NetworkSicenetRepository(
             </soap:Envelope>
         """.trimIndent()
 
+         Log.d("DiagnosticoRed", "Enviando petición HTTP de login...")
+
         return try {
             val response = api.login(soapXml)
+            Log.d("DiagnosticoRed", "Código HTTP recibido: ${response.code()}")
             if (response.isSuccessful && response.body() != null) {
                 Result.success(response.body()!!)
             } else {
@@ -65,6 +68,7 @@ class NetworkSicenetRepository(
                 Result.failure(Exception("Error Perfil: ${response.code()}"))
             }
         } catch (e: Exception) {
+            Log.e("DiagnosticoRed", "Explosión en la red: ${e.message}", e)
             Result.failure(e)
         }
     }
@@ -83,9 +87,16 @@ class NetworkSicenetRepository(
             val response = api.getCargaAcademica(soapXml)
             if (response.isSuccessful && response.body() != null) {
                 val xml = response.body()!!
+
+                if (xml.contains("<html", ignoreCase = true)) {
+                    return Result.failure(Exception("Servidor devolvió HTML"))
+                }
+
                 val jsonString = xml
                     .substringAfter("<getCargaAcademicaByAlumnoResult>")
                     .substringBefore("</getCargaAcademicaByAlumnoResult>")
+
+                Log.d("datosCargaAcademica", jsonString)
 
                 val jsonArray = JSONArray(jsonString)
                 val listaMaterias = mutableListOf<CargaAcademicaEntity>()
@@ -100,13 +111,15 @@ class NetworkSicenetRepository(
                             docente = jsonMateria.optString("Docente", "Sin asignar"),
                             grupo = jsonMateria.optString("Grupo", "-"),
                             creditos = jsonMateria.optString("CreditosMateria", "0"),
+                            lunes = jsonMateria.optString("Lunes", "").trim(),
+                            martes = jsonMateria.optString("Martes", "").trim(),
+                            miercoles = jsonMateria.optString("Miercoles", "").trim(),
+                            jueves = jsonMateria.optString("Jueves", "").trim(),
+                            viernes = jsonMateria.optString("Viernes", "").trim(),
                             fechaSincronizacion = timestamp
                         )
                     )
                 }
-
-//                val cargaAcademica = xml
-//                Log.d("datosCargaAcademica", xml)
 
                 Result.success(listaMaterias)
             } else {

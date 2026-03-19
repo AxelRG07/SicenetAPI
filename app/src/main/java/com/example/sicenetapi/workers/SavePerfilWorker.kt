@@ -15,7 +15,7 @@ class SavePerfilWorker(
         // 1. Extraemos los datos que nos pasó el FetchPerfilWorker
         // inputData contiene lo que el worker anterior puso en su outputData
         val matricula = inputData.getString("matricula") ?: return Result.failure()
-        val contrasena = inputData.getString("password") ?: ""
+        val contrasena = inputData.getString("contrasena") ?: ""
         val nombre = inputData.getString("nombre") ?: ""
         val carrera = inputData.getString("carrera") ?: ""
         val semestre = inputData.getString("semestre") ?: ""

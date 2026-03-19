@@ -4,6 +4,14 @@
 
     <uses-permission android:name="android.permission.INTERNET" />
 
+    <permission
+        android:name="com.example.sicenetapi.permission.READ_DATA"
+        android:protectionLevel="normal" />
+
+    <permission
+        android:name="com.example.sicenetapi.permission.WRITE_DATA"
+        android:protectionLevel="normal" />
+
     <application
         android:name=".SicenetApplication"
         android:allowBackup="true"
@@ -25,6 +33,13 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
+        <provider
+            android:name=".SicenetProvider"
+            android:authorities="com.example.sicenetapi.provider"
+            android:exported="true"
+            android:readPermission="com.example.sicenetapi.permission.READ_DATA"
+            android:writePermission="com.example.sicenetapi.permission.WRITE_DATA" />
     </application>
 
 </manifest>

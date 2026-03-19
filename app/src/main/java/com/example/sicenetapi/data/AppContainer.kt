@@ -18,6 +18,7 @@ import retrofit2.converter.scalars.ScalarsConverterFactory
 
 interface AppContainer {
     val sicenetRepository: SicenetRepository
+    val database: SicenetDatabase
     val alumnoDao: AlumnoDao
     val cargaAcademicaDao: CargaAcademicaDao
     val kardexDao: KardexDao
@@ -57,7 +58,7 @@ class DefaultAppContainer(private val context: Context) : AppContainer {
     // BASE DE DATOS LOCAL
 
     // 3. Inicializamos la Base de Datos usando el contexto
-    private val database: SicenetDatabase by lazy {
+    override val database: SicenetDatabase by lazy {
         SicenetDatabase.getDatabase(context)
     }
 

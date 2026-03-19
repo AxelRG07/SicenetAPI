@@ -11,6 +11,8 @@ import androidx.compose.ui.unit.dp
 import com.example.sicenetapi.data.local.CargaAcademicaEntity
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Star
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -22,6 +24,7 @@ import java.util.Locale
 fun CargaAcademicaScreen(
     viewModel: MainViewModel
 ) {
+
     val listaMaterias by viewModel.cargaAcademicaLocal.collectAsState()
 
     LaunchedEffect(listaMaterias) {
@@ -66,7 +69,6 @@ fun CargaAcademicaScreen(
                 modifier = Modifier.padding(vertical = 8.dp)
             )
 
-            // 4. Dibujamos la lista infinita
             LazyColumn(
                 modifier = Modifier.fillMaxSize(),
                 contentPadding = PaddingValues(bottom = 80.dp) // Espacio al final
@@ -85,38 +87,88 @@ fun MateriaCard(materia: CargaAcademicaEntity) {
         modifier = Modifier
             .fillMaxWidth()
             .padding(vertical = 8.dp),
-        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
+        elevation = CardDefaults.cardElevation(defaultElevation = 3.dp),
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
     ) {
         Column(modifier = Modifier.padding(16.dp)) {
+            // 1. Encabezado de la materia
             Text(
                 text = materia.materia,
+                style = MaterialTheme.typography.titleLarge,
                 fontWeight = FontWeight.Bold,
-                style = MaterialTheme.typography.titleMedium,
                 color = MaterialTheme.colorScheme.primary
             )
-
-            Spacer(modifier = Modifier.height(8.dp))
-
+            Spacer(modifier = Modifier.height(4.dp))
             Text(
                 text = "Docente: ${materia.docente}",
-                style = MaterialTheme.typography.bodyMedium
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+            Text(
+                text = "Grupo: ${materia.grupo} | Créditos: ${materia.creditos}",
+                style = MaterialTheme.typography.labelMedium,
+                color = Color.Gray
             )
 
-            Spacer(modifier = Modifier.height(4.dp))
+            Spacer(modifier = Modifier.height(12.dp))
+            Divider(color = MaterialTheme.colorScheme.outlineVariant)
+            Spacer(modifier = Modifier.height(8.dp))
 
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween
-            ) {
+            // 2. Sección de Horarios Dinámica
+            val horarios = listOf(
+                "Lunes" to materia.lunes,
+                "Martes" to materia.martes,
+                "Miércoles" to materia.miercoles,
+                "Jueves" to materia.jueves,
+                "Viernes" to materia.viernes,
+            ).filter { it.second.isNotBlank() } // Ignora los días sin clase
+
+            if (horarios.isNotEmpty()) {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Icon(
+                        imageVector = Icons.Default.Star,
+                        contentDescription = "Horario",
+                        tint = MaterialTheme.colorScheme.primary,
+                        modifier = Modifier.size(18.dp)
+                    )
+                    Spacer(modifier = Modifier.width(6.dp))
+                    Text(
+                        text = "Horario de Clases",
+                        style = MaterialTheme.typography.labelLarge,
+                        fontWeight = FontWeight.SemiBold,
+                        color = MaterialTheme.colorScheme.primary
+                    )
+                }
+                Spacer(modifier = Modifier.height(8.dp))
+
+                // Dibujamos cada día que tenga clase
+                horarios.forEach { (dia, detalles) ->
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(vertical = 2.dp),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(
+                            text = dia,
+                            style = MaterialTheme.typography.bodyMedium,
+                            fontWeight = FontWeight.Medium
+                        )
+                        // Limpiamos el texto para que luzca mejor (ej. "08:00-09:00 Aula: AT5")
+                        Text(
+                            text = detalles.replace("Aula:", "•"),
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+                }
+            } else {
                 Text(
-                    text = "Grupo: ${materia.grupo}",
-                    style = MaterialTheme.typography.bodySmall
-                )
-                Text(
-                    text = "Créditos: ${materia.creditos}",
+                    text = "Horario no asignado",
                     style = MaterialTheme.typography.bodySmall,
-                    fontWeight = FontWeight.Bold
+                    color = Color.Gray,
+                    modifier = Modifier.padding(top = 4.dp)
                 )
             }
         }

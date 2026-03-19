@@ -17,4 +17,7 @@ interface CargaAcademicaDao {
 
     @Query("DELETE FROM carga_academica")
     suspend fun borrarCarga()
+
+    @Query("SELECT * FROM carga_academica")
+    fun getCargaCursor(): android.database.Cursor
 }

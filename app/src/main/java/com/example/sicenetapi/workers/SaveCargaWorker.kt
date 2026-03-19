@@ -20,7 +20,6 @@ class SaveCargaWorker(
             val appContainer = (applicationContext as SicenetApplication).container
             val dao = appContainer.cargaAcademicaDao
 
-            // 2. Desempaquetamos el String de vuelta a una Lista de Kotlin
             val jsonArray = JSONArray(jsonString)
             val materiasList = mutableListOf<CargaAcademicaEntity>()
 
@@ -32,6 +31,11 @@ class SaveCargaWorker(
                         docente = obj.getString("docente"),
                         grupo = obj.getString("grupo"),
                         creditos = obj.getString("creditos"),
+                        lunes = obj.optString("lunes"),
+                        martes = obj.optString("martes"),
+                        miercoles = obj.optString("miercoles"),
+                        jueves = obj.optString("jueves"),
+                        viernes = obj.optString("viernes"),
                         fechaSincronizacion = obj.getLong("fecha")
                     )
                 )

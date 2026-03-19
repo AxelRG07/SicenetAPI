@@ -60,7 +60,7 @@ class FetchPerfilWorker(
 
                 } else {
                     // Falló la descarga del perfil, le decimos que lo reintente luego
-                    Result.retry()
+                    Result.failure()
                 }
             } else {
                 // Credenciales inválidas
@@ -69,7 +69,8 @@ class FetchPerfilWorker(
         } catch (e: Exception) {
             // Error de conexión
             // Result.retry() hará que Android espere a que regrese el internet y lo intente de nuevo.
-            Result.retry()
+            Log.e("WorkerLogin", "El Worker falló por completo: ${e.message}")
+            return Result.failure()
         }
     }
 }

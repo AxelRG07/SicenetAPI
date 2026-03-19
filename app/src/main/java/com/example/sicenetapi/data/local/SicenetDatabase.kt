@@ -7,7 +7,7 @@ import androidx.room.RoomDatabase
 
 @Database(
     entities = [AlumnoEntity::class, CargaAcademicaEntity::class, KardexEntity::class, CalifFinalEntity::class, CalifUnidadesEntity::class],
-    version = 6,
+    version = 8,
     exportSchema = false
 )
 abstract class SicenetDatabase : RoomDatabase() {
@@ -23,8 +23,7 @@ abstract class SicenetDatabase : RoomDatabase() {
         @Volatile
         private var INSTANCE: SicenetDatabase? = null
 
-        // Patrón Singleton para asegurarnos de que solo exista UNA conexión
-        // a la base de datos en toda la aplicación.
+
         fun getDatabase(context: Context): SicenetDatabase {
             return INSTANCE ?: synchronized(this) {
                 val instance = Room.databaseBuilder(

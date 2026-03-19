@@ -11,5 +11,10 @@ data class CargaAcademicaEntity(
     val docente: String,
     val grupo: String,
     val creditos: String,
+    val lunes: String = "",
+    val martes: String = "",
+    val miercoles: String = "",
+    val jueves: String = "",
+    val viernes: String = "",
     val fechaSincronizacion: Long = System.currentTimeMillis()
 )

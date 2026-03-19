@@ -1,6 +1,7 @@
 package com.example.sicenetapi.ui.screens
 
 import android.content.Context
+import android.util.Log
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -51,6 +52,7 @@ class MainViewModel(
 
     var isLoading by mutableStateOf(false)
         private set
+
 
     val alumnoLocal = container.alumnoDao.getPerfilActual()
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), null)
@@ -125,6 +127,9 @@ class MainViewModel(
             .then(saveRequest)
             .enqueue()
 
+        Log.d("DiagnosticoLogin", "1. Botón presionado. Iniciando proceso para: $matricula")
+
+
         // 5. Monitoreo
         viewModelScope.launch {
             // Escuchamos el flujo de estados de este trabajo específico
@@ -134,6 +139,7 @@ class MainViewModel(
                     // Verificamos si toda la cadena terminó con éxito o si falló.
                     val isFinished = workInfos.all { it.state.isFinished }
                     val hasFailed = workInfos.any { it.state == WorkInfo.State.FAILED }
+                    Log.d("DiagnosticoLogin", "2. Estado del Worker: $isFinished")
 
                     if (isFinished) {
                         isLoading = false
@@ -288,6 +294,56 @@ class MainViewModel(
                         isLoading = false
                         if (hasFailed) {
                             errorMessage = "Error al obtener Calificaciones por Unidad."
+                        }
+                    } else {
+                        isLoading = true
+                    }
+                }
+            }
+        }
+    }
+
+    fun sincronizarTodo() {
+        isLoading = true
+        errorMessage = ""
+
+        val fetchCarga = OneTimeWorkRequestBuilder<FetchCargaWorker>()
+            .setExpedited(OutOfQuotaPolicy.RUN_AS_NON_EXPEDITED_WORK_REQUEST)
+            .build()
+        val saveCarga = OneTimeWorkRequestBuilder<SaveCargaWorker>().build()
+
+        val fetchKardex = OneTimeWorkRequestBuilder<FetchKardexWorker>().build()
+        val saveKardex = OneTimeWorkRequestBuilder<SaveKardexWorker>().build()
+
+        val fetchFinales = OneTimeWorkRequestBuilder<FetchCalifFinalWorker>().build()
+        val saveFinales = OneTimeWorkRequestBuilder<SaveCalifFinalWorker>().build()
+
+        val fetchUnidades = OneTimeWorkRequestBuilder<FetchCalifUnidadesWorker>().build()
+        val saveUnidades = OneTimeWorkRequestBuilder<SaveCalifUnidadesWorker>().build()
+
+        val workName = "SyncGlobalSecuencial"
+
+        workManager.beginUniqueWork(workName, ExistingWorkPolicy.REPLACE, fetchCarga)
+            .then(saveCarga)
+            .then(fetchKardex)
+            .then(saveKardex)
+            .then(fetchFinales)
+            .then(saveFinales)
+            .then(fetchUnidades)
+            .then(saveUnidades)
+            .enqueue()
+
+        //  Monitoreamos el progreso general
+        viewModelScope.launch {
+            workManager.getWorkInfosForUniqueWorkFlow(workName).collect { workInfos ->
+                if (workInfos.isNotEmpty()) {
+                    val isFinished = workInfos.all { it.state.isFinished }
+                    val hasFailed = workInfos.any { it.state == WorkInfo.State.FAILED }
+
+                    if (isFinished) {
+                        isLoading = false
+                        if (hasFailed) {
+                            errorMessage = "Algunos datos no se pudieron sincronizar."
                         }
                     } else {
                         isLoading = true
